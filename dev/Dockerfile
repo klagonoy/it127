@@ -1,4 +1,4 @@
-FROM bitnami/php-fpm:8.1.9
+FROM php:8.1-fpm
 WORKDIR "/application"
 
 RUN apt-get update;
