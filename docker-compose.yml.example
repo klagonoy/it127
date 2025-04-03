@@ -1,18 +1,8 @@
 services:
-    angular-cli:
-        container_name: newton-npm
-        image: node:16-alpine
-        working_dir: /home/node/app
-        volumes:
-            - .:/home/node/app
-        environment:
-            - NODE_ENV=development
-        tty: true
-        restart: always
 
     mysql:
         platform: linux/x86_64
-        container_name: mysql-newton
+        container_name: mysql-lnu
         image: mysql:8.0
         ports:
             - 3306:3306
@@ -22,9 +12,11 @@ services:
             - MYSQL_DATABASE=newton
             - MYSQL_ROOT_PASSWORD=root
         restart: always
+        networks:
+            - webnet
 
     nginx:
-        container_name: nginx-newton
+        container_name: nginx-lnu
         image: nginx:alpine
         working_dir: /application
         volumes:
@@ -35,24 +27,30 @@ services:
         depends_on:
             - mysql
         restart: always
+        networks:
+            - webnet
 
     mailhog:
         platform: linux/x86_64
         image: mailhog/mailhog:latest
-        container_name: newton-mailhog
+        container_name: newton-lnu
         ports:
               - 8025:8025
+        networks:
+            - webnet
 
     php-fpm:
-        platform: linux/x86_64
-        build:
-            context: ./dev
-            dockerfile: Dockerfile
-        container_name: newton-php-fpm
+        image: klagonoy/laravel-php-fpm:8.1-arm
+        container_name: php-fpm-lnu
         working_dir: /application
         volumes:
             - .:/application
             - ./dev/php/php-ini-overrides.ini:/etc/php/8.1/fpm/conf.d/99-overrides.ini
             - ./dev/php/php.ini:/opt/bitnami/php/lib/php.ini
+        networks:
+            - webnet
+networks:
+    webnet:
+        driver: bridge
 volumes:
     db-data:
